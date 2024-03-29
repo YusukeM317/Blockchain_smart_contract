@@ -28,13 +28,15 @@ For more details about the internal architecture of the repository, see [CONTRIB
 
 ## Governance
 
+- there is no onchain governance for now
+
 ### Maintainers
 
-- Mathieu Bour <[mathieu.bour@pooky.gg](mailto:mathieu.bour@pooky.gg)>, Blockchain Engineer, Pooky Labs
+- Claudiu Micu <[claudiu.micu@pooky.gg](mailto:claudiu.micu@pooky.gg)>, Software Engineer, Pooky Labs
 
 ### Contributors
 
-- Claudiu Micu <[claudiu.micu@pooky.gg](mailto:claudiu.micu@pooky.gg)>, Software Engineer, Pooky Labs
+- Mathieu Bour <[mathieu.bour@pooky.gg](mailto:mathieu.bour@pooky.gg)>, Blockchain Engineer, Pooky Labs
 - Dusan Zdravkovic <[duxxud@gmail.com](mailto:duxxud@gmail.com)>, Former Blockchain Engineer, Pooky Labs
 
 ### On-chain maintenance
@@ -45,11 +47,3 @@ We mainly use the following permission contracts:
 - [solady/auth/Ownable.sol](https://github.com/Vectorized/solady/blob/main/src/auth/Ownable.sol)
 - [solady/auth/OwnableRoles.sol](https://github.com/Vectorized/solady/blob/main/src/auth/OwnableRoles.sol)
 - [openzeppelin/access/IAccessControl.sol](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/17c1a3a4584e2cbbca4131f2f1d16168c92f2310/contracts/access/AccessControl.sol)
-
-The administrative privilege of granting/revoking roles is handled by a multi-signature wallet owned by multiple
-engineers of Pooky Labs.
-The address of the current multi-signature admin wallet is [`0x3CC4F4372F83ad3C577eD6e1Aae3D244A1b955D5`](https://polygonscan.com/address/0x3CC4F4372F83ad3C577eD6e1Aae3D244A1b955D5).
-
-The Pooky dApp [pooky.gg](https://pooky.gg/app) serves as reference to the "official" Pooky smart contracts, effectively serving as smart-contracts proxy.
-Pooky Labs may switch the contract implementations at any time on the app.
-In this scenario of a token upgrades, Pooky Labs commits to airdrop the tokens to their owners in the new implementation.

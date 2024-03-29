@@ -12,11 +12,12 @@ out/
 
 # Ignore Environment Variables!
 .env
-.env.prod
+.env.*
 
 # IDEs (JetBrains and VSCode)
 .idea/
 .vscode/
+.history/
 
 # Ignore flattened files
 flattened.txt

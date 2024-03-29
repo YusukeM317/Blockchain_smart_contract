@@ -7,14 +7,16 @@
     "artifacts": "tsx script/artifacts.ts",
     "test": "forge test",
     "coverage": "forge coverage --report lcov --report summary",
-    "lint": "solhint '{src,test}/**/*.sol'"
+    "lint": "solhint '{src,test}/**/*.sol'",
+    "node": "anvil"
   },
   "keywords": [],
   "maintainers": [
-    "Mathieu Bour <mathieu.lbour@pooky.gg>"
+    "Claudiu Micu <claudiu.micu@pooky.gg>"
   ],
   "contributors": [
-    "Claudiu Micu <claudiu.micu@pooky.gg>"
+    "Mathieu Bour <mathieu.lbour@pooky.gg>",
+    "Dusan Zdravkovic <duxxud@gmail.com>"
   ],
   "license": "MIT",
   "type": "module",

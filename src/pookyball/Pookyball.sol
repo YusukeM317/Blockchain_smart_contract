@@ -67,6 +67,7 @@ contract Pookyball is
   constructor(
     string memory _baseURI,
     string memory _contractURI,
+    address _admin,
     address _receiver,
     address _vrfCoordinator,
     bytes32 _vrfKeyHash,
@@ -84,7 +85,7 @@ contract Pookyball is
     vrfCallbackGasLimit = _vrfCallbackGasLimit;
 
     _setDefaultRoyalty(_receiver, ROYALTY);
-    _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    _grantRole(DEFAULT_ADMIN_ROLE, _admin);
   }
 
   /// @notice Set the URI of the contract-level metadata.

@@ -8,8 +8,9 @@ abstract contract POKSetup is BaseTest {
   POK public pok;
 
   constructor() {
-    vm.startPrank(makeAddr("admin"));
-    pok = new POK();
+    address admin = makeAddr("admin");
+    vm.startPrank(admin);
+    pok = new POK(admin);
     pok.grantRole(pok.MINTER(), makeAddr("minter"));
     vm.stopPrank();
   }

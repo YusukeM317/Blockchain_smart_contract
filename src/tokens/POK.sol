@@ -25,8 +25,8 @@ contract POK is IPOK, ERC20, AccessControl {
   /// Thrown when a POK transfer is attempted.
   error Soulbounded();
 
-  constructor() ERC20("POK", "POK") {
-    _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+  constructor(address _admin) ERC20("POK", "POK") {
+    _grantRole(DEFAULT_ADMIN_ROLE, _admin);
   }
 
   /// @notice Mint an arbitrary amount of $POK to an account.
