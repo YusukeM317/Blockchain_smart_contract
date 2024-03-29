@@ -17,6 +17,7 @@ abstract contract PookyballSetup is BaseTest, VRFCoordinatorV2Setup {
     pookyball = new Pookyball(
       "https://metadata.pooky.gg/pookyballs/",
       "https://metadata.pooky.gg/contracts/Pookyball",
+      admin,
       makeAddr("treasury"),
       address(vrf),
       keccak256("foobar"),
