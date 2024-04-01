@@ -13,14 +13,17 @@ ALLOWED_CONTRACTS=(
     "BoostPXP"
     "Pookyball"
     "PookyballLevelUp"
+    "RefillableSale"
+    "Pressure"
     "PookyballReroll"
-    "PookyballAscension"
     "Stickers"
-    "StickersController"
-    "StickersManager"
     "StickersLevelUp"
     "StickersSale"
+    "StickersController"
+    "StickersManager"
     "StickersAscension"
+    "PookyballAscension"
+    "Rewards"
 )
 
 # Define the networks
@@ -34,8 +37,13 @@ function usage {
     echo "Examples:"
     # Iterate over each contract
     for contract in "${ALLOWED_CONTRACTS[@]}"; do
+
         # Display the example usage for the current contract on the current network
-        echo "$0 local $contract"
+        if [[ " ${NETWORKS[@]} " =~ " ${NETWORK} " ]]; then
+            echo "$0 $NETWORK $contract"
+        else
+            echo "$0 local $contract"
+        fi
     done
     exit 1
 }
@@ -64,7 +72,7 @@ if [[ "$NETWORK" == "local" ]]; then
     RPC_URL_ARG="--fork-url $RPC_URL"
 else
     DEPLOYMENT_SCRIPTS="script/$NETWORK"
-    RPC_URL_ARG="--verify --rpc-url $RPC_URL"
+    RPC_URL_ARG="--rpc-url $RPC_URL"
 fi
 
 # Dynamically find the contract file
@@ -77,3 +85,6 @@ fi
 
 # Execute the forge script
 forge script $CONTRACT_FILE --tc Deploy$CONTRACT_NAME $RPC_URL_ARG --broadcast
+
+# Flatten the contract whru flatten ( ./flatten.sh: No such file or directory ) 
+$PWD/script/shell/flatten.sh $CONTRACT_NAME
