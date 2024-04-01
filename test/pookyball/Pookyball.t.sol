@@ -138,10 +138,39 @@ contract PookyballTest is BaseTest, AccessControlAssertions, PookyballSetup {
     assertEq(pookyball.metadata(tokenId).pxp, newPXP);
   }
 
+  function testFuzz_updateVRF() public {
+    uint64 subscriptionId = vrf.createSubscription();
+
+    vm.prank(admin);
+    pookyball.updateVRF(address(vrf), keccak256("foobar"), subscriptionId, 10, 2500000);
+    assertEq(address(pookyball.vrfCoordinator()), address(vrf));
+    assertEq(pookyball.vrfKeyHash(), keccak256("foobar"));
+    assertEq(pookyball.vrfSubId(), subscriptionId);
+    assertEq(pookyball.vrfMinimumRequestConfirmations(), 10);
+    assertEq(pookyball.vrfCallbackGasLimit(), 2500000);
+  }
+
+  function testFuzz_disable_vrf_changes() public {
+    assertEq(pookyball.canUpdateVRF(), true);
+    vm.prank(admin);
+    pookyball.disableUpdateVRF();
+    assertEq(pookyball.canUpdateVRF(), false);
+  }
+
+  function testFuzz_enable_vrf_usage() public {
+    assertEq(pookyball.canUseVRF(), false);
+    vm.prank(admin);
+    pookyball.enableVRF();
+    assertEq(pookyball.canUseVRF(), true);
+  }
+
   function testFuzz_fullfillRandomWords_revertOnlyCoordinatorCanFulfill(uint256 seed) public {
+    vm.prank(admin);
+    pookyball.enableVRF();
+
     uint256 tokenId = mintPookyball(user1);
 
-    uint256[] memory words = new uint[](1);
+    uint256[] memory words = new uint256[](1);
     words[0] = seed;
 
     vm.expectRevert(
@@ -156,9 +185,12 @@ contract PookyballTest is BaseTest, AccessControlAssertions, PookyballSetup {
   }
 
   function testFuzz_fullfillRandomWords_passSingle(uint256 seed) public {
+    vm.prank(admin);
+    pookyball.enableVRF();
+
     uint256 tokenId = mintPookyball(user1);
 
-    uint256[] memory words = new uint[](1);
+    uint256[] memory words = new uint256[](1);
     words[0] = seed;
 
     vm.prank(address(vrf));
@@ -168,6 +200,9 @@ contract PookyballTest is BaseTest, AccessControlAssertions, PookyballSetup {
   }
 
   function testFuzz_fullfillRandomWords_passMulti(uint8 seed1, uint8 seed2) public {
+    vm.prank(admin);
+    pookyball.enableVRF();
+
     address[] memory addresses = new address[](2);
     addresses[0] = user1;
     addresses[1] = user1;
@@ -181,7 +216,7 @@ contract PookyballTest is BaseTest, AccessControlAssertions, PookyballSetup {
     uint256 tokenId1 = tokenId2 - 1;
 
     // seeds are assigned in the reverse order
-    uint256[] memory words = new uint[](2);
+    uint256[] memory words = new uint256[](2);
     words[0] = seed2;
     words[1] = seed1;
 
@@ -190,6 +225,22 @@ contract PookyballTest is BaseTest, AccessControlAssertions, PookyballSetup {
 
     assertEq(pookyball.metadata(tokenId1).seed, seed1);
     assertEq(pookyball.metadata(tokenId2).seed, seed2);
+  }
+
+  function testFuzz_mint_without_vrf() public {
+    assertEq(pookyball.canUseVRF(), false);
+
+    address[] memory addresses = new address[](1);
+    addresses[0] = user1;
+
+    PookyballRarity[] memory rarities = new PookyballRarity[](1);
+    rarities[0] = PookyballRarity.COMMON;
+
+    vm.prank(minter);
+    uint256 tokenId1 = pookyball.mint(addresses, rarities);
+    assertEq(tokenId1, 1);
+
+    assertNotEq(pookyball.metadata(tokenId1).seed, 0x0);
   }
 
   function test_setApprovalForAll_pass() public {
