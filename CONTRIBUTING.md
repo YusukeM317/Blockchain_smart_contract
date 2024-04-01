@@ -42,4 +42,4 @@ etc.
 
 - [Foundry Book](https://book.getfoundry.sh/)
 - [OpenZeppelin Contracts 4.x](https://docs.openzeppelin.com/contracts/4.x/)
-- [Polygon Mumbai Testnet Faucet](https://mumbaifaucet.com/)
+- [Polygon Amoy Testnet Faucet](https://faucet.polygon.technology/)
