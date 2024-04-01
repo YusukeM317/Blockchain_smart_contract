@@ -38,12 +38,15 @@ contract DeployStickers is Script {
 
     vm.stopBroadcast();
 
-    // ================ Admin grant roles ================
-    vm.startBroadcast(adminPK);
+    uint256 chainID = vm.envUint("CHAIN_ID");
+    if (chainID != 31337 && chainID != 80002) {
+      // ================ Admin grant roles ================
+      vm.startBroadcast(adminPK);
 
-    console.log("Add the Stickers consumer to VRF Coordinator");
-    vrf.coordinator.addConsumer(vrf.subcriptionId, address(stickers));
+      console.log("Add the Stickers consumer to VRF Coordinator");
+      vrf.coordinator.addConsumer(vrf.subcriptionId, address(stickers));
 
-    vm.stopBroadcast();
+      vm.stopBroadcast();
+    }
   }
 }

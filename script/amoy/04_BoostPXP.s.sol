@@ -29,7 +29,9 @@ contract DeployBoostPXP is Script {
 
     // ================ Admin grant roles ================
     vm.startBroadcast(adminPK);
+
     nonces.grantRole(nonces.OPERATOR(), address(boostPXP));
+
     vm.stopBroadcast();
   }
 }
