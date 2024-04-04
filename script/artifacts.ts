@@ -1,8 +1,9 @@
-import glob from 'fast-glob';
-import { exec as execAsync } from 'node:child_process';
-import { mkdir, writeFile } from 'node:fs/promises';
-import { basename, dirname } from 'node:path';
-import { promisify } from 'util';
+import glob from "fast-glob";
+import { basename, dirname } from "node:path";
+import { exec as execAsync } from "node:child_process";
+import { mkdir, writeFile } from "node:fs/promises";
+import { promisify } from "util";
+
 const exec = promisify(execAsync);
 
 /**
@@ -10,8 +11,8 @@ const exec = promisify(execAsync);
  * @param contract The contract path.
  */
 async function abi(contract: string): Promise<void> {
-  const name = basename(contract).replace(/\.sol$/, '');
-  const output = contract.replace(/^src/, 'abi').replace(/\.sol$/, '.json');
+  const name = basename(contract).replace(/\.sol$/, "");
+  const output = contract.replace(/^src/, "abi").replace(/\.sol$/, ".json");
   await mkdir(dirname(output), { recursive: true });
 
   const { stdout } = await exec(`forge inspect ${contract}:${name} abi`);
@@ -23,16 +24,23 @@ async function abi(contract: string): Promise<void> {
  * @param contract The contract path.
  */
 async function bytecode(contract: string): Promise<void> {
-  const name = basename(contract).replace(/\.sol$/, '');
-  const output = contract.replace(/^src/, 'bytecode').replace(/\.sol$/, '.bin');
+  const name = basename(contract).replace(/\.sol$/, "");
+  const output = contract.replace(/^src/, "bytecode").replace(/\.sol$/, ".bin");
   await mkdir(dirname(output), { recursive: true });
 
   const { stdout } = await exec(`forge inspect ${contract}:${name} bytecode`);
   await writeFile(output, stdout);
 }
 
-const contracts = await glob('src/**/*.sol');
+// Get all contracts
+let contracts = await glob("src/**/*.sol");
+// Filter out types directory
+contracts = contracts.filter((contract) => !contract.includes("/types/"));
+// Filter out interfaces
+contracts = contracts.filter((contract) => !contract.includes("/I"));
+
 const jobs = contracts.reduce<Promise<void>[]>((acc, contract) => {
+  console.log(contract);
   acc.push(abi(contract), bytecode(contract));
   return acc;
 }, []);

@@ -13,6 +13,11 @@
         "internalType": "string"
       },
       {
+        "name": "_admin",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
         "name": "_receiver",
         "type": "address",
         "internalType": "address"
@@ -162,6 +167,32 @@
   },
   {
     "type": "function",
+    "name": "canUpdateVRF",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "canUseVRF",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "contractURI",
     "inputs": [],
     "outputs": [
@@ -169,6 +200,39 @@
         "name": "",
         "type": "string",
         "internalType": "string"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "disableUpdateVRF",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "enableVRF",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "generateRandomSeed",
+    "inputs": [
+      {
+        "name": "tokenId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -690,6 +754,39 @@
   },
   {
     "type": "function",
+    "name": "updateVRF",
+    "inputs": [
+      {
+        "name": "_vrfCoordinator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_vrfKeyHash",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "_vrfSubId",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "_vrfMinimumRequestConfirmations",
+        "type": "uint16",
+        "internalType": "uint16"
+      },
+      {
+        "name": "_vrfCallbackGasLimit",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "vrfCallbackGasLimit",
     "inputs": [],
     "outputs": [
@@ -697,6 +794,19 @@
         "name": "",
         "type": "uint32",
         "internalType": "uint32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "vrfCoordinator",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract VRFCoordinatorV2Interface"
       }
     ],
     "stateMutability": "view"

@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
-import { VRFConsumerBaseV2 } from "chainlink/vrf/VRFConsumerBaseV2.sol";
+import { DefaultOperatorFilterer } from "operator-filter-registry/DefaultOperatorFilterer.sol";
+import { ERC2981 } from "openzeppelin/token/common/ERC2981.sol";
 import { ERC721A } from "ERC721A/ERC721A.sol";
 import { ERC721ABurnable } from "ERC721A/extensions/ERC721ABurnable.sol";
 import { ERC721AQueryable } from "ERC721A/extensions/ERC721AQueryable.sol";
-import { IERC721A } from "ERC721A/IERC721A.sol";
-import { ERC2981 } from "openzeppelin/token/common/ERC2981.sol";
-import { DefaultOperatorFilterer } from "operator-filter-registry/DefaultOperatorFilterer.sol";
-import { Ownable } from "solady/auth/Ownable.sol";
 import { IBaseERC721A } from "@/common/IBaseERC721A.sol";
+import { IERC721A } from "ERC721A/IERC721A.sol";
+import { Ownable } from "solady/auth/Ownable.sol";
 import { VRFConfig } from "@/types/VRFConfig.sol";
+import { VRFConsumerBaseV2 } from "chainlink/vrf/VRFConsumerBaseV2.sol";
+import { VRFCoordinatorV2Interface } from "chainlink/interfaces/VRFCoordinatorV2Interface.sol";
 
 /// @title BaseERC721A
 /// @author Mathieu Bour for Pooky Labs Ltd.
@@ -41,6 +42,8 @@ contract BaseERC721A is
   // VRF parameters
   VRFConfig public vrf;
   mapping(uint256 => uint256) public vrfRequests;
+  bool public canUpdateVRF = true;
+  bool public canUseVRF = false;
 
   /// The random numbers associated with the tokens: tokenId => randomWord.
   mapping(uint256 => uint256) public seeds;
@@ -115,15 +118,24 @@ contract BaseERC721A is
   function _mint(address to, uint256 quantity) internal virtual override {
     super._mint(to, quantity);
 
-    uint256 requestId = vrf.coordinator.requestRandomWords(
-      vrf.keyHash,
-      vrf.subcriptionId,
-      vrf.minimumRequestConfirmations,
-      vrf.callbackGasLimit,
-      uint32(quantity)
-    );
+    if (canUseVRF) {
+      // Request entropy from the VRF coordinator
+      uint256 requestId = vrf.coordinator.requestRandomWords(
+        vrf.keyHash,
+        vrf.subcriptionId,
+        vrf.minimumRequestConfirmations,
+        vrf.callbackGasLimit,
+        uint32(quantity)
+      );
 
-    vrfRequests[requestId] = _totalMinted();
+      vrfRequests[requestId] = _totalMinted();
+    } else {
+      for (uint256 i = 0; i < quantity; i++) {
+        uint256 tokenId = _totalMinted() - i;
+        seeds[tokenId] = generateRandomSeed(tokenId);
+        emit SeedSet(tokenId, seeds[tokenId]);
+      }
+    }
   }
 
   /// @notice Receive the entropy from the VRF coordinator.
@@ -216,5 +228,44 @@ contract BaseERC721A is
     returns (bool)
   {
     return super.supportsInterface(interfaceId) || ERC721A.supportsInterface(interfaceId);
+  }
+
+  // disable update vrf
+  function disableUpdateVRF() external onlyOwner {
+    canUpdateVRF = false;
+  }
+
+  // enable vrf usage
+  function enableVRF() external onlyOwner {
+    canUseVRF = true;
+  }
+
+  // update vrf
+  function updateVRF(
+    address _vrfCoordinator,
+    bytes32 _vrfKeyHash,
+    uint64 _vrfSubId,
+    uint16 _vrfMinimumRequestConfirmations,
+    uint32 _vrfCallbackGasLimit
+  ) external onlyOwner {
+    require(canUpdateVRF, "VRF can't be updated");
+    vrf = VRFConfig(
+      VRFCoordinatorV2Interface(_vrfCoordinator),
+      _vrfKeyHash,
+      _vrfSubId,
+      _vrfMinimumRequestConfirmations,
+      _vrfCallbackGasLimit
+    );
+  }
+
+  // generate pseudo random seed
+  function generateRandomSeed(uint256 tokenId) public view returns (uint256) {
+    // Hash the combination of block timestamp, sender's address, and token ID
+    bytes32 hash = keccak256(abi.encodePacked(block.timestamp, msg.sender, tokenId));
+
+    // Convert the hash to a uint256
+    uint256 randomSeed = uint256(hash);
+
+    return randomSeed;
   }
 }

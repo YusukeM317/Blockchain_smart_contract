@@ -57,12 +57,14 @@ contract Pookyball is
   mapping(uint256 => PookyballMetadata) _metadata;
 
   // VRF parameters
-  VRFCoordinatorV2Interface vrfCoordinator;
+  VRFCoordinatorV2Interface public vrfCoordinator;
   bytes32 public vrfKeyHash;
   uint64 public vrfSubId;
   uint16 public vrfMinimumRequestConfirmations;
   uint32 public vrfCallbackGasLimit;
   mapping(uint256 => uint256) vrfRequests;
+  bool public canUpdateVRF = true;
+  bool public canUseVRF = false;
 
   constructor(
     string memory _baseURI,
@@ -148,14 +150,25 @@ contract Pookyball is
       _metadata[lastTokenId] = PookyballMetadata(rarities[i], 0, 0, 0);
     }
 
-    uint256 requestId = vrfCoordinator.requestRandomWords(
-      vrfKeyHash,
-      vrfSubId,
-      vrfMinimumRequestConfirmations,
-      vrfCallbackGasLimit,
-      uint32(recipients.length)
-    );
-    vrfRequests[requestId] = lastTokenId;
+    if (canUseVRF) {
+      // Request entropy from the VRF coordinator
+      uint256 requestId = vrfCoordinator.requestRandomWords(
+        vrfKeyHash,
+        vrfSubId,
+        vrfMinimumRequestConfirmations,
+        vrfCallbackGasLimit,
+        uint32(recipients.length)
+      );
+      vrfRequests[requestId] = lastTokenId;
+    } else {
+      // Generate pseudo random seed
+      for (uint256 i = 0; i < recipients.length; i++) {
+        uint256 tokenId = lastTokenId - i;
+        uint256 seed = generateRandomSeed(tokenId);
+        _metadata[tokenId].seed = seed;
+        emit SeedSet(tokenId, seed);
+      }
+    }
 
     return lastTokenId;
   }
@@ -256,5 +269,42 @@ contract Pookyball is
     onlyAllowedOperator(from)
   {
     super.safeTransferFrom(from, to, tokenId, data);
+  }
+
+  // disable update vrf
+  function disableUpdateVRF() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    canUpdateVRF = false;
+  }
+
+  // enable vrf usage
+  function enableVRF() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    canUseVRF = true;
+  }
+
+  // update vrf
+  function updateVRF(
+    address _vrfCoordinator,
+    bytes32 _vrfKeyHash,
+    uint64 _vrfSubId,
+    uint16 _vrfMinimumRequestConfirmations,
+    uint32 _vrfCallbackGasLimit
+  ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(canUpdateVRF, "VRF can't be updated");
+    vrfCoordinator = VRFCoordinatorV2Interface(_vrfCoordinator);
+    vrfKeyHash = _vrfKeyHash;
+    vrfSubId = _vrfSubId;
+    vrfMinimumRequestConfirmations = _vrfMinimumRequestConfirmations;
+    vrfCallbackGasLimit = _vrfCallbackGasLimit;
+  }
+
+  // generate pseudo random seed
+  function generateRandomSeed(uint256 tokenId) public view returns (uint256) {
+    // Hash the combination of block timestamp, sender's address, and token ID
+    bytes32 hash = keccak256(abi.encodePacked(block.timestamp, msg.sender, tokenId));
+
+    // Convert the hash to a uint256
+    uint256 randomSeed = uint256(hash);
+
+    return randomSeed;
   }
 }

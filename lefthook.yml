@@ -5,7 +5,7 @@ pre-commit:
   parallel: true
   commands:
     test:
-      run: NO_COLOR=1 forge test
+      run: bash -c "NO_COLOR=1 forge test"
     artifacts:
       run: |
         pnpm rimraf abi bytecode

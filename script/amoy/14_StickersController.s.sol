@@ -24,5 +24,7 @@ contract DeployStickersController is Script {
     );
 
     console.log("StickersController deployed at:", address(controller));
+
+    vm.stopBroadcast();
   }
 }

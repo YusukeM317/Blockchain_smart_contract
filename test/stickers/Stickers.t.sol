@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
-import { VRFConsumerBaseV2 } from "chainlink/vrf/VRFConsumerBaseV2.sol";
-import { Strings } from "openzeppelin/utils/Strings.sol";
+import { BaseTest } from "@test/BaseTest.sol";
 import { Ownable } from "solady/auth/Ownable.sol";
 import { StickerMetadata, StickerMint, StickerRarity } from "@/stickers/IStickers.sol";
-import { BaseTest } from "@test/BaseTest.sol";
 import { StickersSetup } from "@test/setup/StickersSetup.sol";
+import { Strings } from "openzeppelin/utils/Strings.sol";
+import { VRFConfig } from "@/types/VRFConfig.sol";
+import { VRFConsumerBaseV2 } from "chainlink/vrf/VRFConsumerBaseV2.sol";
+import { VRFCoordinatorV2Interface } from "chainlink/interfaces/VRFCoordinatorV2Interface.sol";
 
 contract StickersTest is BaseTest, StickersSetup {
   using Strings for uint256;
@@ -43,6 +45,27 @@ contract StickersTest is BaseTest, StickersSetup {
     vm.prank(admin);
     stickers.setBaseURI(newURI);
     assertEq(bytes(stickers.baseURI()), bytes(newURI));
+  }
+
+  function testFuzz_updateVRF() public {
+    uint64 subscriptionId = vrf.createSubscription();
+
+    vm.prank(admin);
+    stickers.updateVRF(address(vrf), keccak256("foobar"), subscriptionId, 10, 2500000);
+  }
+
+  function testFuzz_disable_vrf_changes() public {
+    assertEq(stickers.canUpdateVRF(), true);
+    vm.prank(admin);
+    stickers.disableUpdateVRF();
+    assertEq(stickers.canUpdateVRF(), false);
+  }
+
+  function testFuzz_enable_vrf_usage() public {
+    assertEq(stickers.canUseVRF(), false);
+    vm.prank(admin);
+    stickers.enableVRF();
+    assertEq(stickers.canUseVRF(), true);
   }
 
   function test_tokenURI_pass() public {
@@ -96,9 +119,12 @@ contract StickersTest is BaseTest, StickersSetup {
   }
 
   function testFuzz_fullfillRandomWords_revertOnlyCoordinatorCanFulfill(uint256 seed) public {
+    vm.prank(admin);
+    stickers.enableVRF();
+
     uint256 tokenId = mintSticker(user1);
 
-    uint256[] memory words = new uint[](1);
+    uint256[] memory words = new uint256[](1);
     words[0] = seed;
 
     vm.expectRevert(
@@ -113,9 +139,12 @@ contract StickersTest is BaseTest, StickersSetup {
   }
 
   function testFuzz_fullfillRandomWords_passSingle(uint256 seed) public {
+    vm.prank(admin);
+    stickers.enableVRF();
+
     uint256 tokenId = mintSticker(user1);
 
-    uint256[] memory words = new uint[](1);
+    uint256[] memory words = new uint256[](1);
     words[0] = seed;
 
     vm.prank(address(vrf));
@@ -125,6 +154,9 @@ contract StickersTest is BaseTest, StickersSetup {
   }
 
   function testFuzz_fullfillRandomWords_passMulti(uint256 seed1, uint256 seed2) public {
+    vm.prank(admin);
+    stickers.enableVRF();
+
     StickerRarity[] memory rarities = new StickerRarity[](2);
     rarities[0] = randomStickerRarity(seed1);
     rarities[1] = randomStickerRarity(seed2);
@@ -135,7 +167,7 @@ contract StickersTest is BaseTest, StickersSetup {
     uint256 tokenId1 = tokenId2 - 1;
 
     // seeds are assigned in the reverse order
-    uint256[] memory words = new uint[](2);
+    uint256[] memory words = new uint256[](2);
     words[0] = seed2;
     words[1] = seed1;
 

@@ -3,8 +3,6 @@ pragma solidity ^0.8.21;
 
 import "forge-std/console.sol";
 import { Script } from "forge-std/Script.sol";
-import { BoostPXP } from "@/common/BoostPXP.sol";
-import { NonceRegistry } from "@/common/NonceRegistry.sol";
 import { Pookyball } from "@/pookyball/Pookyball.sol";
 
 contract DeployPookyball is Script {
