@@ -64,11 +64,4 @@ For more details about the internal architecture of the repository, see [CONTRIB
 - Mathieu Bour <[mathieu.bour@pooky.gg](mailto:mathieu.bour@pooky.gg)>, Blockchain Engineer, Pooky Labs
 - Dusan Zdravkovic <[duxxud@gmail.com](mailto:duxxud@gmail.com)>, Former Blockchain Engineer, Pooky Labs
 
-### On-chain maintenance
 
-Most of the Pooky smart contracts are either Ownable or role-based.
-We mainly use the following permission contracts:
-
-- [solady/auth/Ownable.sol](https://github.com/Vectorized/solady/blob/main/src/auth/Ownable.sol)
-- [solady/auth/OwnableRoles.sol](https://github.com/Vectorized/solady/blob/main/src/auth/OwnableRoles.sol)
-- [openzeppelin/access/IAccessControl.sol](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/17c1a3a4584e2cbbca4131f2f1d16168c92f2310/contracts/access/AccessControl.sol)
